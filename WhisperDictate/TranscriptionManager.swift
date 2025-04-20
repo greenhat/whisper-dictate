@@ -234,7 +234,7 @@ class TranscriptionManager: ObservableObject {
         // Add model parameter
         data.append("--\(boundary)\r\n".data(using: .utf8)!)
         data.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
-        data.append("whisper-1\r\n".data(using: .utf8)!)
+        data.append("gpt-4o-mini-transcribe\r\n".data(using: .utf8)!)
         
         // Add temperature parameter for stability
         data.append("--\(boundary)\r\n".data(using: .utf8)!)
