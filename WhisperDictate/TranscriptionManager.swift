@@ -241,6 +241,14 @@ class TranscriptionManager: ObservableObject {
         // data.append("Content-Disposition: form-data; name=\"temperature\"\r\n\r\n".data(using: .utf8)!)
         // data.append("0.0\r\n".data(using: .utf8)!)
         
+        // Add custom prompt if available
+        let customPrompt = SettingsManager.loadPrompt()
+        if !customPrompt.isEmpty {
+            data.append("--\(boundary)\r\n".data(using: .utf8)!)
+            data.append("Content-Disposition: form-data; name=\"prompt\"\r\n\r\n".data(using: .utf8)!)
+            data.append("\(customPrompt)\r\n".data(using: .utf8)!)
+        }
+
         // Add final boundary
         data.append("--\(boundary)--\r\n".data(using: .utf8)!)
         

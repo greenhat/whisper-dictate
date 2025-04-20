@@ -6,7 +6,7 @@ struct MenuBarView: View {
     @ObservedObject var transcriptionManager: TranscriptionManager
     @ObservedObject var coordinator: RecordingCoordinator
     @State private var apiKey: String = UserDefaults.standard.string(forKey: "OpenAIAPIKey") ?? ""
-    @State private var customPrompt: String = UserDefaults.standard.string(forKey: "WhisperCustomPrompt") ?? ""
+    @State private var customPrompt: String = SettingsManager.loadPrompt()
     
     init(audioManager: AudioManager, hotkeyManager: HotkeyManager, transcriptionManager: TranscriptionManager, coordinator: RecordingCoordinator) {
         self.audioManager = audioManager
@@ -83,7 +83,7 @@ struct MenuBarView: View {
                             .stroke(Color.gray.opacity(0.5))
                     )
                     .onChange(of: customPrompt) { newValue in
-                        UserDefaults.standard.set(newValue, forKey: "WhisperCustomPrompt")
+                        SettingsManager.savePrompt(newValue)
                         logInfo("Custom prompt updated")
                     }
             }

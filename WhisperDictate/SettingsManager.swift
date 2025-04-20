@@ -1,0 +1,53 @@
+import Foundation
+
+/// Manages persistence of application settings, such as custom prompt.
+struct SettingsManager {
+    private static let promptFileName = "prompt.txt"
+    private static let appDirectoryName = "WhisperDictate"
+
+    /// Returns the URL to the application-specific directory in Application Support.
+    private static var directoryURL: URL? {
+        do {
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            guard let dir = appSupport?.appendingPathComponent(appDirectoryName, isDirectory: true) else {
+                return nil
+            }
+            // Ensure the directory exists
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
+            return dir
+        } catch {
+            logError("Failed to create Settings directory: \(error)")
+            return nil
+        }
+    }
+
+    /// Saves the custom prompt to a file in Application Support.
+    static func savePrompt(_ prompt: String) {
+        guard let fileURL = directoryURL?.appendingPathComponent(promptFileName) else {
+            logError("Cannot determine file URL for saving prompt")
+            return
+        }
+        do {
+            try prompt.write(to: fileURL, atomically: true, encoding: .utf8)
+            logInfo("Prompt saved to \(fileURL.path)")
+        } catch {
+            logError("Failed to save prompt: \(error)")
+        }
+    }
+
+    /// Loads the custom prompt from a file in Application Support. Returns an empty string if not found or upon error.
+    static func loadPrompt() -> String {
+        guard let fileURL = directoryURL?.appendingPathComponent(promptFileName) else {
+            logError("Cannot determine file URL for loading prompt")
+            return ""
+        }
+        do {
+            let prompt = try String(contentsOf: fileURL, encoding: .utf8)
+            logInfo("Prompt loaded from \(fileURL.path)")
+            return prompt
+        } catch {
+            // No file or failed read: return empty prompt
+            return ""
+        }
+    }
+}
