@@ -7,6 +7,7 @@ struct MenuBarView: View {
     @ObservedObject var coordinator: RecordingCoordinator
     @State private var apiKey: String = UserDefaults.standard.string(forKey: "OpenAIAPIKey") ?? ""
     @State private var customPrompt: String = SettingsManager.loadPrompt()
+    @State private var selectedModel: TranscriptionModel = SettingsManager.loadModel()
     
     init(audioManager: AudioManager, hotkeyManager: HotkeyManager, transcriptionManager: TranscriptionManager, coordinator: RecordingCoordinator) {
         self.audioManager = audioManager
@@ -86,6 +87,21 @@ struct MenuBarView: View {
                         SettingsManager.savePrompt(newValue)
                         logInfo("Custom prompt updated")
                     }
+            }
+            .padding(.vertical, 5)
+            
+            VStack(alignment: .leading) {
+                Text("Transcription Model:")
+                Picker("Model", selection: $selectedModel) {
+                    ForEach(TranscriptionModel.allCases) { model in
+                        Text(model.displayName).tag(model)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .onChange(of: selectedModel) { newValue in
+                    SettingsManager.saveModel(newValue)
+                    logInfo("Model selection updated to \(newValue.rawValue)")
+                }
             }
             .padding(.vertical, 5)
             
