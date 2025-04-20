@@ -6,6 +6,7 @@ struct MenuBarView: View {
     @ObservedObject var transcriptionManager: TranscriptionManager
     @ObservedObject var coordinator: RecordingCoordinator
     @State private var apiKey: String = UserDefaults.standard.string(forKey: "OpenAIAPIKey") ?? ""
+    @State private var customPrompt: String = UserDefaults.standard.string(forKey: "WhisperCustomPrompt") ?? ""
     
     init(audioManager: AudioManager, hotkeyManager: HotkeyManager, transcriptionManager: TranscriptionManager, coordinator: RecordingCoordinator) {
         self.audioManager = audioManager
@@ -69,6 +70,17 @@ struct MenuBarView: View {
                     .onChange(of: apiKey) { oldValue, newValue in
                         transcriptionManager.setAPIKey(newValue)
                         logInfo("API Key updated")
+                    }
+            }
+            .padding(.vertical, 5)
+            
+            VStack(alignment: .leading) {
+                Text("Transcribe API Prompt (Optional):")
+                TextField("Enter keywords, names, or context...", text: $customPrompt)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .onChange(of: customPrompt) { newValue in
+                        UserDefaults.standard.set(newValue, forKey: "WhisperCustomPrompt")
+                        logInfo("Custom prompt updated")
                     }
             }
             .padding(.vertical, 5)
