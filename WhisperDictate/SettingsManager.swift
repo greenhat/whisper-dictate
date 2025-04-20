@@ -1,8 +1,26 @@
 import Foundation
 
-/// Manages persistence of application settings, such as custom prompt.
+/// Available transcription models to use with OpenAI Whisper API.
+enum TranscriptionModel: String, CaseIterable, Identifiable {
+    case gpt4oTranscribe = "gpt-4o-transcribe"
+    case gpt4oMiniTranscribe = "gpt-4o-mini-transcribe"
+
+    var id: String { rawValue }
+    /// Human-readable display name.
+    var displayName: String {
+        switch self {
+        case .gpt4oTranscribe:
+            return "gpt-4o-transcribe"
+        case .gpt4oMiniTranscribe:
+            return "gpt-4o-mini-transcribe"
+        }
+    }
+}
+
+/// Manages persistence of application settings, such as custom prompt and transcription model selection.
 struct SettingsManager {
     private static let promptFileName = "prompt.txt"
+    private static let modelFileName = "model.txt"
     private static let appDirectoryName = "WhisperDictate"
 
     /// Returns the URL to the application-specific directory in Application Support.
@@ -48,6 +66,41 @@ struct SettingsManager {
         } catch {
             // No file or failed read: return empty prompt
             return ""
+        }
+    }
+
+    /// Saves the selected transcription model to a file in Application Support.
+    static func saveModel(_ model: TranscriptionModel) {
+        guard let fileURL = directoryURL?.appendingPathComponent(modelFileName) else {
+            logError("Cannot determine file URL for saving model")
+            return
+        }
+        do {
+            try model.rawValue.write(to: fileURL, atomically: true, encoding: .utf8)
+            logInfo("Selected model saved to \(fileURL.path)")
+        } catch {
+            logError("Failed to save selected model: \(error)")
+        }
+    }
+
+    /// Loads the selected transcription model from a file in Application Support. Returns default if not found or upon error.
+    static func loadModel() -> TranscriptionModel {
+        guard let fileURL = directoryURL?.appendingPathComponent(modelFileName) else {
+            logError("Cannot determine file URL for loading model")
+            return .gpt4oMiniTranscribe
+        }
+        do {
+            let raw = try String(contentsOf: fileURL, encoding: .utf8)
+            if let model = TranscriptionModel(rawValue: raw.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                logInfo("Loaded selected model \(model.rawValue) from \(fileURL.path)")
+                return model
+            } else {
+                logError("Unknown model value \(raw), using default")
+                return .gpt4oMiniTranscribe
+            }
+        } catch {
+            // No file or failed read: return default model
+            return .gpt4oMiniTranscribe
         }
     }
 }
