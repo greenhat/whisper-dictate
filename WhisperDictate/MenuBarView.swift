@@ -76,8 +76,12 @@ struct MenuBarView: View {
             
             VStack(alignment: .leading) {
                 Text("Transcribe API Prompt (Optional):")
-                TextField("Enter keywords, names, or context...", text: $customPrompt)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                TextEditor(text: $customPrompt)
+                    .frame(height: 100)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.gray.opacity(0.5))
+                    )
                     .onChange(of: customPrompt) { newValue in
                         UserDefaults.standard.set(newValue, forKey: "WhisperCustomPrompt")
                         logInfo("Custom prompt updated")
