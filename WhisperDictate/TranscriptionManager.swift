@@ -232,9 +232,10 @@ class TranscriptionManager: ObservableObject {
         data.append("\r\n".data(using: .utf8)!)
         
         // Add model parameter
+        let model = SettingsManager.loadModel().rawValue
         data.append("--\(boundary)\r\n".data(using: .utf8)!)
         data.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n".data(using: .utf8)!)
-        data.append("gpt-4o-mini-transcribe\r\n".data(using: .utf8)!)
+        data.append("\(model)\r\n".data(using: .utf8)!)
         
         // // Add temperature parameter for stability
         // data.append("--\(boundary)\r\n".data(using: .utf8)!)
