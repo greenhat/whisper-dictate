@@ -2,13 +2,19 @@ import Foundation
 
 /// Available transcription models to use with OpenAI Whisper API.
 enum TranscriptionModel: String, CaseIterable, Identifiable {
+    case gptTranscribe = "gpt-transcribe"
     case gpt4oTranscribe = "gpt-4o-transcribe"
     case gpt4oMiniTranscribe = "gpt-4o-mini-transcribe"
+
+    /// Model used when no valid selection has been saved.
+    static let defaultModel: TranscriptionModel = .gptTranscribe
 
     var id: String { rawValue }
     /// Human-readable display name.
     var displayName: String {
         switch self {
+        case .gptTranscribe:
+            return "gpt-transcribe"
         case .gpt4oTranscribe:
             return "gpt-4o-transcribe"
         case .gpt4oMiniTranscribe:
@@ -87,7 +93,7 @@ struct SettingsManager {
     static func loadModel() -> TranscriptionModel {
         guard let fileURL = directoryURL?.appendingPathComponent(modelFileName) else {
             logError("Cannot determine file URL for loading model")
-            return .gpt4oMiniTranscribe
+            return .defaultModel
         }
         do {
             let raw = try String(contentsOf: fileURL, encoding: .utf8)
@@ -96,11 +102,11 @@ struct SettingsManager {
                 return model
             } else {
                 logError("Unknown model value \(raw), using default")
-                return .gpt4oMiniTranscribe
+                return .defaultModel
             }
         } catch {
             // No file or failed read: return default model
-            return .gpt4oMiniTranscribe
+            return .defaultModel
         }
     }
 }
